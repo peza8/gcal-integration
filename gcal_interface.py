@@ -1,4 +1,5 @@
 import os
+from typing import List
 import datetime
 
 from google.auth.transport.requests import Request
@@ -34,9 +35,10 @@ class GCalInterface:
             with open('token.json', 'w') as token:
                 token.write(self.creds.to_json())
 
-    def get_categories(self, min_date: datetime.datetime, max_date: datetime.datetime) -> dict:
+    def get_events_for_time_window(self, min_date: datetime.datetime, max_date: datetime.datetime) -> dict:
         """Method to fetch raw
         """
+        events_list = []
         try:
             print(f"Fetching category data from {min_date} to {max_date}")
             page_token = None
@@ -44,18 +46,25 @@ class GCalInterface:
             max_date_str = max_date.isoformat() + 'Z'
             while True:
                 events = self.client.events().list(
-                    calendarId='primary',
+                    calendarId='josh.perry@aerobotics.com',
                     pageToken=page_token,
                     timeMin=min_date_str,
                     timeMax=max_date_str,
-                    # maxResults=10,
-                    # singleEvents=True,
                 ).execute()
-                for event in events['items']:
-                    print(event.get('summary'))
-                    print(event.get('eventType'))
+                events_list += events.get("items")
                 page_token = events.get('nextPageToken')
                 if not page_token:
                     break
         except HttpError as err:
             print(f'HTTP error: {err}')
+        return events_list
+
+    def get_calendars(self) -> List[str]:
+        page_token = None
+        while True:
+            calendar_list = self.client.calendarList().list(pageToken=page_token).execute()
+            for calendar_list_entry in calendar_list['items']:
+                print(calendar_list_entry['summary'])
+            page_token = calendar_list.get('nextPageToken')
+            if not page_token:
+                break

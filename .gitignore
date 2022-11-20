@@ -33,6 +33,7 @@ dist/
 
 # Secrets
 credentials.json
+token.json
 
 # Unit test reports
 TEST*.xml
