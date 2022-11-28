@@ -14,7 +14,6 @@ def plot_event_type_aggregates(events: List[Event], ax: plt.Axes):
         y='duration',
         rot=45,
         width=1.0,
-        figsize=(10,6),
         ax=ax,
         color=colors
     )
@@ -23,7 +22,9 @@ def plot_event_type_aggregates(events: List[Event], ax: plt.Axes):
 
     # plt.gcf().subplots_adjust(bottom=0.35, top=0.7) #adjusting the plotting area
     plt.tight_layout()
-    plt.show()
 
 def plot_event_categories_pie(events: List[Event], ax: plt.Axes):
-    pass
+    events_df = Event.get_dataframe_from_events(events)
+    events_df_aggregate = events_df.groupby(["category"])["duration"].sum()
+    events_df_aggregate.plot.pie(y="category")
+    plt.tight_layout()
